@@ -14,7 +14,7 @@ app.post("/sign-up", (req, res) => {
 
     const { username, avatar } = req.body;
 
-    if (!username || !avatar) {
+    if ((!username || !avatar) || (typeof username !== "string") || (typeof avatar !== "string")) {
         return res.status(400).send("Todos os campos são obrigatórios!");
     }
 
@@ -41,7 +41,7 @@ app.post("/tweets", (req, res) => {
         return res.status(401).send("UNAUTHORIZED");
     }
     
-    if (!username || !tweet) {
+    if ((!username || !tweet)  || (typeof username !== "string") || (typeof tweet !== "string")) {
         return res.status(400).send("Todos os campos são obrigatórios!");
     }
 
@@ -58,14 +58,24 @@ app.get("/tweets", (req, res) => {
     let { page } = req.query;
     page = Number(page);
 
-    if (page < 1 || typeof page !== "number") {
+    if (page < 1) {
         return res.status(400).send("Informe uma página válida!");
+    }
+
+    if (!page) {
+        page = 1;
     }
 
     const tweetsPagination = (page) => {
 
         if (page === 1) {
-            return tweets.slice(0, 10);
+
+            if (tweets.length < 10) {
+                return tweets.slice(0, tweets.length);
+
+            } else {
+                return tweets.slice(0, 10);
+            }
 
         } else {
 
