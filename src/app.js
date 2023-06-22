@@ -15,10 +15,10 @@ app.post("/sign-up", (req, res) => {
     const { username, avatar } = req.body;
 
     if (!username || !avatar) {
-        return res.status(400).send("Todos os campos são obrigatórios!.");
+        return res.status(400).send("Todos os campos são obrigatórios!");
     }
 
-    users.push({
+    users.unshift({
         username: username,
         avatar: avatar
     });
@@ -28,12 +28,13 @@ app.post("/sign-up", (req, res) => {
 
 app.post("/tweets", (req, res) => {
 
-    const { username, tweet } = req.body;
+    const username = req.headers.user;
+    const { tweet } = req.body;
 
     const isUserAuth = () => {
 
-        const user = users.find((user) => user.username === username);    
-        return (typeof(user) !== "undefined") ? true : false;
+        const user = users.find((user) => user.username === username);
+        return (typeof(user) !== "undefined");
     }
 
     if (!isUserAuth()) {
@@ -41,10 +42,10 @@ app.post("/tweets", (req, res) => {
     }
     
     if (!username || !tweet) {
-        return res.status(400).send("Todos os campos são obrigatórios!.");
+        return res.status(400).send("Todos os campos são obrigatórios!");
     }
 
-    tweets.push({
+    tweets.unshift({
         username: username,
         tweet: tweet
     })
@@ -54,7 +55,27 @@ app.post("/tweets", (req, res) => {
 
 app.get("/tweets", (req, res) => {
 
-    const latestTweets = tweets.slice(-10);
+    let { page } = req.query;
+    page = Number(page);
+
+    if (page < 1 || typeof page !== "number") {
+        return res.status(400).send("Informe uma página válida!");
+    }
+
+    const tweetsPagination = (page) => {
+
+        if (page === 1) {
+            return tweets.slice(0, 10);
+
+        } else {
+
+            const start = 10 * (page - 1);
+            const end = 10 + start;
+            return tweets.slice(start, end);
+        }
+    }
+
+    const latestTweets = tweetsPagination(page);
     const listOfTweets = latestTweets.map(latestTweet => {
 
         const user = users.find((user) => (user.username === latestTweet.username));
@@ -68,6 +89,29 @@ app.get("/tweets", (req, res) => {
             tweet: tweet,
             avatar: avatar
         };
+    })
+
+    return res.status(200).send(listOfTweets);
+})
+
+app.get("/tweets/:username", (req, res) => {
+
+    const username = req.params.username;
+    const user = users.find((user) => (user.username === username));
+
+    const listOfTweets = [];
+    tweets.forEach(tweet => {
+
+        if (tweet.username === username) {
+
+            const avatar = user.avatar;
+    
+            listOfTweets.push({
+                username: username,
+                tweet: tweet.tweet,
+                avatar: avatar
+            });
+        }
     })
 
     return res.status(200).send(listOfTweets);
