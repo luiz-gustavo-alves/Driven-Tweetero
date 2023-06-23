@@ -32,15 +32,13 @@ app.post("/tweets", (req, res) => {
     const { tweet } = req.body;
 
     const isUserAuth = () => {
-
-        const user = users.find((user) => user.username === username);
-        return (typeof(user) !== "undefined");
+        return users.find((user) => user.username === username);
     }
 
     if (!isUserAuth()) {
         return res.status(401).send("UNAUTHORIZED");
     }
-    
+
     if ((!username || !tweet)  || (typeof username !== "string") || (typeof tweet !== "string")) {
         return res.status(400).send("Todos os campos são obrigatórios!");
     }
@@ -68,10 +66,12 @@ app.get("/tweets", (req, res) => {
 
     const tweetsPagination = (page) => {
 
+        const maxTweets = tweets.length;
+
         if (page === 1) {
 
             if (tweets.length < 10) {
-                return tweets.slice(0, tweets.length);
+                return tweets.slice(0, maxTweets);
 
             } else {
                 return tweets.slice(0, 10);
@@ -80,6 +80,11 @@ app.get("/tweets", (req, res) => {
         } else {
 
             const start = 10 * (page - 1);
+
+            if (start > maxTweets) {
+                return [];
+            }
+
             const end = 10 + start;
             return tweets.slice(start, end);
         }
