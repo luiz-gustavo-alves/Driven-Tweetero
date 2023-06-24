@@ -46,7 +46,7 @@ app.post("/tweets", (req, res) => {
     tweets.unshift({
         username: username,
         tweet: tweet
-    })
+    });
 
     return res.status(201).send("OK");
 })
@@ -54,14 +54,23 @@ app.post("/tweets", (req, res) => {
 app.get("/tweets", (req, res) => {
 
     let { page } = req.query;
-    page = Number(page);
 
     if (page < 1) {
         return res.status(400).send("Informe uma página válida!");
     }
 
+    /* No given query param */
     if (!page) {
         page = 1;
+
+    } else {
+
+        page = Number(page);
+
+        /* Invalid query param */
+        if (!page) {
+            return res.status(400).send("Informe uma página válida!");
+        }
     }
 
     const tweetsPagination = (page) => {
@@ -70,27 +79,25 @@ app.get("/tweets", (req, res) => {
 
         if (page === 1) {
 
-            if (tweets.length < 10) {
-                return tweets.slice(0, maxTweets);
-
-            } else {
+            if (maxTweets >= 10) {
                 return tweets.slice(0, 10);
             }
 
-        } else {
-
-            const start = 10 * (page - 1);
-
-            if (start > maxTweets) {
-                return [];
-            }
-
-            const end = 10 + start;
-            return tweets.slice(start, end);
+            return tweets.slice(0, maxTweets);
         }
+
+        const start = 10 * (page - 1);
+
+        if (start > maxTweets) {
+            return [];
+        }
+
+        const end = 10 + start;
+        return tweets.slice(start, end);
     }
 
     const latestTweets = tweetsPagination(page);
+
     const listOfTweets = latestTweets.map(latestTweet => {
 
         const user = users.find((user) => (user.username === latestTweet.username));
@@ -112,15 +119,16 @@ app.get("/tweets", (req, res) => {
 app.get("/tweets/:username", (req, res) => {
 
     const username = req.params.username;
-    const user = users.find((user) => (user.username === username));
 
+    const user = users.find((user) => (user.username === username));
     const listOfTweets = [];
+
     tweets.forEach(tweet => {
 
         if (tweet.username === username) {
 
             const avatar = user.avatar;
-    
+
             listOfTweets.push({
                 username: username,
                 tweet: tweet.tweet,
