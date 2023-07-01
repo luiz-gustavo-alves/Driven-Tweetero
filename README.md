@@ -1,5 +1,5 @@
 # Driven-Tweetero <img width="40" height="40" src="https://cdn.pixabay.com/photo/2013/06/07/09/53/twitter-117595_1280.png"/>
-Construção de uma API simples utilizando Express.
+Construção de uma API simples utilizando Express e NodeJS.
 
 ## Requisitos Obrigatórios ⚠️
 
@@ -19,7 +19,7 @@ tweetSchema = {
 }
 ```
 
-## Métodos HTTP ⚙️
+## Rotas ⚙️
 
 ### /sign-up
 ![](https://place-hold.it/80x20/26ec48/ffffff?text=POST&fontsize=16) Recebe o parâmetro **username, avatar** pelo _body_ e salva o usuário na variável global.
